@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -168,15 +169,6 @@ namespace ApiClientApp
             }
         }
 
-        private async Task<string> GetTrendsAsync()
-        {
-            string trendsUrl = $"http://127.0.0.1:8083/Trends";
-            HttpResponseMessage response = await client.GetAsync(trendsUrl);
-            response.EnsureSuccessStatusCode();
-            string responseContent = await response.Content.ReadAsStringAsync();
-            return responseContent;
-        }
-
         private async void ButtonFetch_Click(object sender, EventArgs e)
         {
             try
@@ -209,16 +201,16 @@ namespace ApiClientApp
                 switch (method)
                 {
                     case "GET":
-                        response = await FetchDataFromApi(apiUrl);
+                        response = await FetchDataFromDatabase();
                         break;
                     case "POST":
-                        response = await PostDataToApi(apiUrl, textBoxPostData?.Text ?? string.Empty);
+                        response = await InsertDataToDatabase(textBoxPostData?.Text ?? string.Empty);
                         break;
                     case "PUT":
-                        response = await PutDataToApi(apiUrl, textBoxPostData?.Text ?? string.Empty);
+                        response = await UpdateDataInDatabase(textBoxPostData?.Text ?? string.Empty);
                         break;
                     case "DELETE":
-                        response = await DeleteDataFromApi(apiUrl);
+                        response = await DeleteDataFromDatabase(textBoxPostData?.Text ?? string.Empty);
                         break;
                     case "TRENDS":
                         response = await GetTrendsAsync();
@@ -242,39 +234,44 @@ namespace ApiClientApp
             }
         }
 
-        private async Task<string> FetchDataFromApi(string url)
+        private async Task<string> FetchDataFromDatabase()
         {
-            HttpResponseMessage response = await client.GetAsync(url);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
-        }
+            string connectionString = "Server=TERHI_BERRY\\SQLEXPRESS;Database=APIdb;Trusted_Connection=True;";
+            string query = "SELECT * FROM APIdata"; 
 
-        private async Task<string> PostDataToApi(string url, string postData)
-        {
-            StringContent content = new StringContent(postData, Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await client.PostAsync(url, content);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
-        }
-
-        private async Task<string> PutDataToApi(string url, string putData)
-        {
-            StringContent content = new StringContent(putData, Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await client.PutAsync(url, content);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
-        }
-
-        private async Task<string> DeleteDataFromApi(string url)
-        {
-            HttpResponseMessage response = await client.DeleteAsync(url);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                        {
+                            if (reader.HasRows)
+                            {
+                                var dataTable = new DataTable();
+                                dataTable.Load(reader);
+                                return DataTableToJson(dataTable);
+                            }
+                            else
+                            {
+                                return "No data found.";
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Error fetching data from database: {ex.Message}");
+                return $"Error fetching data from database: {ex.Message}";
+            }
         }
 
         private async Task<string> InsertDataToDatabase(string sqlCommand)
         {
-            string connectionString = "Server=TERHI_BERRY\\SQLEXPRESS;Database=APIdb;Trusted_Connection=True;"; 
+            string connectionString = "Server=TERHI_BERRY\\SQLEXPRESS;Database=APIdb;Trusted_Connection=True;";
 
             try
             {
@@ -295,6 +292,92 @@ namespace ApiClientApp
             }
         }
 
+        private async Task<string> UpdateDataInDatabase(string sqlCommand)
+        {
+            string connectionString = "Server=TERHI_BERRY\\SQLEXPRESS;Database=APIdb;Trusted_Connection=True;";
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    using (SqlCommand command = new SqlCommand(sqlCommand, connection))
+                    {
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+                        return $"{rowsAffected} rows updated.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Error updating data in database: {ex.Message}");
+                return $"Error updating data in database: {ex.Message}";
+            }
+        }
+
+        private async Task<string> DeleteDataFromDatabase(string sqlCommand)
+        {
+            string connectionString = "Server=TERHI_BERRY\\SQLEXPRESS;Database=APIdb;Trusted_Connection=True;";
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    using (SqlCommand command = new SqlCommand(sqlCommand, connection))
+                    {
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+                        return $"{rowsAffected} rows deleted.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Error deleting data from database: {ex.Message}");
+                return $"Error deleting data from database: {ex.Message}";
+            }
+        }
+
+        private async Task<string> GetTrendsAsync()
+        {
+            string connectionString = "Server=TERHI_BERRY\\SQLEXPRESS;Database=APIdb;Trusted_Connection=True;";
+            string query = "SELECT TrendColumn FROM TrendTable"; 
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                        {
+                            if (reader.HasRows)
+                            {
+                                var dataTable = new DataTable();
+                                dataTable.Load(reader);
+                                return DataTableToJson(dataTable); 
+                            }
+                            else
+                            {
+                                return "No data found.";
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Error fetching trends from database: {ex.Message}");
+                return $"Error fetching trends from database: {ex.Message}";
+            }
+        }
+
+        private string DataTableToJson(DataTable table)
+        {
+            return JsonConvert.SerializeObject(table, Formatting.Indented);
+        }
+
         private string ParseJson(string jsonData)
         {
             try
@@ -304,7 +387,7 @@ namespace ApiClientApp
             }
             catch (JsonReaderException)
             {
-                return jsonData; 
+                return jsonData;
             }
         }
     }
