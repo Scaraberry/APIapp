@@ -25,7 +25,7 @@ namespace ApiClientApp
 
         private string username = "username";
         private string password = "password";
-        private string baseUrl = "http://127.0.0.1:8083/Values";
+        private string baseUrl = "url";
         private BearerToken token;
 
         public Form1()
@@ -111,7 +111,7 @@ namespace ApiClientApp
 
         private async Task ObtainBearerTokenAsync()
         {
-            Uri tokenUri = new Uri("http://127.0.0.1:8083/GetToken");
+            Uri tokenUri = new Uri("url");
             try
             {
                 string credentials = $"{username}:{password}";
@@ -234,7 +234,7 @@ namespace ApiClientApp
 
         private async Task<string> FetchDataFromDatabase()
         {
-            string connectionString = "Server=TERHI_BERRY\\SQLEXPRESS;Database=APIdb;Trusted_Connection=True;";
+            string connectionString = "Server=server\\SQLEXPRESS;Database=APIdb;Trusted_Connection=True;";
             string query = "SELECT * FROM APIdata"; 
 
             try
@@ -269,7 +269,7 @@ namespace ApiClientApp
 
         private async Task<string> InsertDataToDatabase(string sqlCommand)
         {
-            string connectionString = "Server=TERHI_BERRY\\SQLEXPRESS;Database=APIdb;Trusted_Connection=True;";
+            string connectionString = "Server=server\\SQLEXPRESS;Database=db;Trusted_Connection=True;";
 
             try
             {
@@ -292,7 +292,7 @@ namespace ApiClientApp
 
         private async Task<string> UpdateDataInDatabase(string sqlCommand)
         {
-            string connectionString = "Server=TERHI_BERRY\\SQLEXPRESS;Database=APIdb;Trusted_Connection=True;";
+            string connectionString = "Server=server\\SQLEXPRESS;Database=db;Trusted_Connection=True;";
 
             try
             {
@@ -338,7 +338,7 @@ namespace ApiClientApp
 
         private async Task<string> GetTrendsAsync()
         {
-            string connectionString = "Server=TERHI_BERRY\\SQLEXPRESS;Database=APIdb;Trusted_Connection=True;";
+            string connectionString = "Server=server\\SQLEXPRESS;Database=db;Trusted_Connection=True;";
             string query = "SELECT TrendColumn FROM TrendTable"; 
 
             try
