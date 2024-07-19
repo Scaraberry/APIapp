@@ -315,7 +315,7 @@ namespace ApiClientApp
 
         private async Task<string> DeleteDataFromDatabase(string sqlCommand)
         {
-            string connectionString = "Server=TERHI_BERRY\\SQLEXPRESS;Database=APIdb;Trusted_Connection=True;";
+            string connectionString = "Server=server;Database=db;Trusted_Connection=True;";
 
             try
             {
