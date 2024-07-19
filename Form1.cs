@@ -215,9 +215,6 @@ namespace ApiClientApp
                     case "TRENDS":
                         response = await GetTrendsAsync();
                         break;
-                    case "DATABASE":
-                        response = await InsertDataToDatabase(textBoxPostData?.Text ?? string.Empty);
-                        break;
                 }
 
                 textBoxResult.Text = ParseJson(response);
