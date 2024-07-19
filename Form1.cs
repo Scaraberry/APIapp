@@ -1,3 +1,4 @@
+
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -51,7 +52,7 @@ namespace ApiClientApp
                 Width = 300,
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
-            comboBoxMethod.Items.AddRange(new string[] { "GET", "POST", "PUT", "DELETE", "TRENDS", "DATABASE" });
+            comboBoxMethod.Items.AddRange(new string[] { "GET", "POST", "PUT", "DELETE", "TRENDS" });
             comboBoxMethod.SelectedIndex = 0;
             Controls.Add(comboBoxMethod);
 
