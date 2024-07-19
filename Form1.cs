@@ -23,8 +23,8 @@ namespace ApiClientApp
         private TextBox textBoxLog;
         private TextBox textBoxToken;
 
-        private string username = "admin";
-        private string password = "Admin!23";
+        private string username = "username";
+        private string password = "password";
         private string baseUrl = "http://127.0.0.1:8083/Values";
         private BearerToken token;
 
